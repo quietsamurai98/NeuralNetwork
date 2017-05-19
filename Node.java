@@ -14,15 +14,25 @@ public class Node {
 	boolean isInput;
     public Node() {
     	//No parameters = input node
+    	weights = new double[1];
+    	weights[0] = 1.0;
     	isInput = true;
     }
     public Node(int numWeights){
     	//Creates node with numWeights input weights, plus 1 bias weight
     	isInput = false;
     	weights = new double[numWeights + 1];
-    	double initialWeight = 1; //Math.sqrt(2/(numWeights+1));
+    	double weightRange = 1; //Initial value of weights will be some random value from -weightRange to + weightRange
     	for(int i=0; i<numWeights; i++){
-    		weights[i] = (Math.random()*2.0-1.0)*initialWeight; //Initial weight is random number between -sqrt(2/(n+1)) and sqrt(2/(n+1))
+    		weights[i] = (Math.random()*2.0-1.0)*weightRange; //Initial weight is random number between -sqrt(2/(n+1)) and sqrt(2/(n+1))
+    	}
+    }
+    public Node(double[] givenWeights){
+    	//Creates node with provided weights
+    	isInput = false;
+    	weights = new double[givenWeights.length];
+    	for(int i=0; i<givenWeights.length; i++){
+    		weights[i] = givenWeights[i];
     	}
     }
     public double calc(double[] inputs){ //Returns the neuron output given a list of inputs
@@ -43,6 +53,20 @@ public class Node {
     	return sum;
     }
     private double activationFunc(double sum){ //Applys activation function to sum
-    	return Math.tanh(sum); //Activation function is tanh
+    	return CustomUtils.sigmoid(sum); //Activation function is sigmoid
     }
+    public double[] getWeights(){
+    	return CustomUtils.deepCopy(weights);
+    }
+    public void setWeights(double[] inputs){
+    	for(int i=0; i<inputs.length; i++){
+    		weights[i] = inputs[i];
+    	}
+    }
+    public void mutateWeights(double maxChange){
+    	for(int i=0; i<weights.length; i++){
+    		weights[i]+=(Math.random()*2.0-1.0)*maxChange;
+    	}
+    }
+    
 }
