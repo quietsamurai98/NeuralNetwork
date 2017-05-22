@@ -55,7 +55,30 @@ public class Network {
     		}
     	}
     }
+    public Network(double[][][] networkWeights, int[][] activeFunc){ //Creates network with pre-defined weights and activation functions.
     
+    	//-----networkWeights structure-----
+    	//networkWeights 		  = whole network
+    	//networkWeights[i] 	  = the layer i of the network
+    	//networkWeights[i][j]    = the jth node in layer i of the network
+    	//networkWeights[i][j][k] = the kth input weight of node j in layer i of the network
+    	
+    	
+    	networkNodes = new Node[networkWeights.length][];
+    	networkValues = new double[networkWeights.length][];
+    	for(int i=0; i<networkWeights.length; i++){
+    		networkNodes[i] = new Node[networkWeights[i].length];
+    		networkValues[i] = new double[networkWeights[i].length];
+    		for(int j=0; j<networkWeights[i].length; j++){
+    			networkValues[i][j]=0.0;
+    			if(i==0){
+					networkNodes[i][j] = new Node(); //Input nodes have no weights
+    			} else {
+    				networkNodes[i][j] = new Node(networkWeights[i][j], activeFunc[i][j]); //Create node with layerCounts[i-1] input weights
+    			}
+    		}
+    	}
+    }
     public double[] calc(double inputs[]){
     	
     	if(inputs.length!=networkValues[0].length){
@@ -75,13 +98,16 @@ public class Network {
     }
     
     public Network clone(){ //returns a deep copy of this instance
-    	return new Network(getNetworkWeights());
+    	return new Network(getNetworkWeights(), getNetworkFuncs());
     }
     
-    public void mutateNodes(double maxChange){ //Change the weights of all neurons by a random amount between -maxChange and +maxChange
+    public void mutateNodes(double maxChange, double funcMutateProb){ //Change the weights of all neurons by a random amount between -maxChange and +maxChange
     	for(Node[] layer : networkNodes){
     		for(Node node : layer){
     			node.mutateWeights(maxChange);
+    			if(Math.random()<funcMutateProb){
+    				node.randomizeActivationFunc();
+    			}
     		}
     	}
     }
@@ -100,5 +126,28 @@ public class Network {
     		}
     	}
     	return networkWeights;
+    }
+    
+    public int[][] getNetworkFuncs(){
+    	int [][] networkFuncs = new int[networkNodes.length][];
+    	for(int i = 0; i < networkNodes.length; i++){
+    		networkFuncs[i] = new int[networkNodes[i].length];
+    		for(int j = 0; j < networkNodes[i].length; j++){
+    			networkFuncs[i][j] = networkNodes[i][j].getActivationFunc();
+    		}
+    	}
+    	return networkFuncs;
+    }
+    
+    public String toString(){
+    	String out = "";
+    	int[][] arr = getNetworkFuncs();
+    	for(int row[]:arr){
+    		for(int elem:row){
+    			out+=elem+" ";
+    		}
+    		out+="\n";
+    	}
+    	return out;
     }
 }
